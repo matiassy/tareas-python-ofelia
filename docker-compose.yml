@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.python-script-job-1.schedule: "0 35 08 * *"
+      ofelia.job-exec.python-script-job-1.command: "python3 /app/script.py"
+      ofelia.job-exec.python-script-job-1.container: "tareas-app" 
+    networks:
+      - network-app
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia-app
+    restart: unless-stopped
+    command: daemon --docker
+    #user: root
+    environment:
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - app
+    networks:
+      - network-app
+
+networks:
+  network-app:
+    driver: bridge
